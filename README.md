@@ -13,6 +13,7 @@ A **production-ready industrial IoT predictive maintenance system** that uses ma
 
 Unlike traditional reactive maintenance, our AI model analyzes real-time sensor data (temperature, vibration, pressure, current, RPM) to forecast failures with **97% accuracy**, allowing maintenance teams to act before catastrophic breakdowns occur.
 
+<img width="1857" height="888" alt="Screenshot 2026-04-14 191330" src="https://github.com/user-attachments/assets/f4031e30-b228-4d61-bbce-df8e4725d5c7" />
 ### Why This Matters 💡
 
 In manufacturing plants:
