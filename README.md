@@ -427,9 +427,9 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 ## 👤 Author
 
 **Your Name**  
-📧 [your.email@example.com](mailto:your.email@example.com)  
-💼 [LinkedIn Profile](https://linkedin.com/in/yourprofile)  
-🐙 [GitHub Profile](https://github.com/yourprofile)
+📧 [Email ID ](harshitvshah2554@gmail.com)  
+💼 [LinkedIn Profile](https://www.linkedin.com/in/harshit-v-shah375/?skipRedirect=true)  
+🐙 [GitHub Profile](https://github.com/Harshit1975)
 
 Built as a **proof-of-work portfolio project** demonstrating enterprise AI/ML engineering capabilities for:
 - 🎓 Placement applications
@@ -450,3 +450,11 @@ Built as a **proof-of-work portfolio project** demonstrating enterprise AI/ML en
 
 **Last Updated**: April 2026  
 **Status**: ✅ Production Ready
+
+
+<img width="1546" height="856" alt="Screenshot 2026-04-14 191353" src="https://github.com/user-attachments/assets/9d88f717-61cd-45a9-b274-9f3346cf4c16" />
+
+<img width="1877" height="878" alt="Screenshot 2026-04-14 191342" src="https://github.com/user-attachments/assets/f416852c-bb46-4c71-a062-9de46a368a6e" />
+
+<img width="1586" height="877" alt="Screenshot 2026-04-14 191402" src="https://github.com/user-attachments/assets/5b2d5568-d4ce-460c-a1d9-f1ffbffe2ded" />
+
