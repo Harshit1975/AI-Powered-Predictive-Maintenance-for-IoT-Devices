@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - PredicTech{% endblock %}
+
+{% block auth_content %}
+<div class="glass-panel auth-form-card">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+    <h2>New Operator</h2>
+    <p>Setup your Console access credentials</p>
+    
+    <form method="POST" action="{{ url_for('register') }}">
+        <div class="input-group">
+            <label for="username">Operator ID</label>
+            <input type="text" id="username" name="username" required placeholder="Choose a unique ID">
+        </div>
+        <div class="input-group">
+            <label for="password">Security Pin</label>
+            <input type="password" id="password" name="password" required minlength="4" placeholder="Choose a secure Pin">
+        </div>
+        <button type="submit" class="btn-primary">Register Access</button>
+    </form>
+    <div class="switch-auth">
+        Already have access? <a href="{{ url_for('login') }}">Sign In</a>
+    </div>
+</div>
+{% endblock %}

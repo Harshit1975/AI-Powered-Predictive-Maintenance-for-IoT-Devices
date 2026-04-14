@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Log History - PredicTech{% endblock %}
+
+{% block content %}
+<div class="dashboard-top">
+    <div class="title">
+        <h1>Historical Telemetry Logs</h1>
+        <p>Review past predictions and sensor operations</p>
+    </div>
+    <div class="actions">
+        <a href="{{ url_for('export_csv') }}" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 10px 20px; background: #38bdf8; color: #0f172a; font-weight: 600; border-radius: 6px; box-shadow: 0 4px 15px rgba(56,189,248,0.3);">⬇️ Download CSV Report</a>
+    </div>
+</div>
+
+<div class="glass-panel table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Temperature (°C)</th>
+                <th>Vibration (mm/s)</th>
+                <th>Power Load (A)</th>
+                <th>Pressure (psi)</th>
+                <th>RPM</th>
+                <th>Confidence (%)</th>
+                <th>AI Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="color: var(--text-secondary);">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ log.temperature }}</td>
+                <td>{{ log.vibration }}</td>
+                <td>{{ log.current }}</td>
+                <td>{{ log.pressure or 'N/A' }}</td>
+                <td>{{ log.rpm or 'N/A' }}</td>
+                <td>{{ log.confidence or 0.0 }}</td>
+                <td>
+                    {% if log.prediction == 'Failure Predicted' %}
+                        <span class="badge badge-danger">Failure</span>
+                    {% else %}
+                        <span class="badge badge-normal">Normal</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-secondary);">No logs found. Run the dashboard to generate data.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

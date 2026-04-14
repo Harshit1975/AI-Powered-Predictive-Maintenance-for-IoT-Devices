@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Machine Fleet Dashboard - PredicTech{% endblock %}
+
+{% block content %}
+<div class="dashboard-top">
+    <div class="title">
+        <h1>🏭 Machine Fleet Monitoring</h1>
+        <p>Real-time health status across all production equipment</p>
+    </div>
+</div>
+
+<div class="metrics-row" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Total Machines</span>
+        <span style="font-size: 2rem; font-weight: 800;" id="total-machines">0</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Online & monitored</span>
+    </div>
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Operating</span>
+        <span style="font-size: 2rem; font-weight: 800; color: var(--success);" id="operating-count">0</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Running normally</span>
+    </div>
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Warning</span>
+        <span style="font-size: 2rem; font-weight: 800; color: var(--warning);" id="warning-count">0</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Requires attention</span>
+    </div>
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Critical</span>
+        <span style="font-size: 2rem; font-weight: 800; color: var(--danger);" id="critical-count">0</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Immediate action needed</span>
+    </div>
+</div>
+
+<div class="glass-panel" style="margin-top: 1.5rem;">
+    <div class="chart-header">
+        <h3>Fleet Status Overview</h3>
+        <span style="color: var(--text-secondary); font-size: 0.9rem;">Last updated: <span id="update-time">now</span></span>
+    </div>
+    <div id="fleet-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        {% for machine in machines %}
+        <div class="glass-panel" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="margin: 0; font-size: 1.1rem;">{{ machine.name }}</h4>
+                <span class="badge" style="{% if machine.status == 'operating' %}background: rgba(16, 185, 129, 0.2); color: var(--success);{% elif machine.status == 'warning' %}background: rgba(245, 158, 11, 0.2); color: var(--warning);{% else %}background: rgba(239, 68, 68, 0.2); color: var(--danger);{% endif %} padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                    {{ machine.status }}
+                </span>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Health Score</span>
+                    <span style="font-weight: 700;">{{ machine.health_score }}%</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden;">
+                    <div style="height: 100%; background: {% if machine.health_score >= 80 %}var(--success){% elif machine.health_score >= 60 %}var(--warning){% else %}var(--danger){% endif %}; width: {{ machine.health_score }}%; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+            
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                <p style="margin: 4px 0;"><strong>Location:</strong> {{ machine.location }}</p>
+                <p style="margin: 4px 0;"><strong>Last Maintenance:</strong> 
+                    {% if machine.last_maintenance %}{{ machine.last_maintenance.strftime('%Y-%m-%d') }}{% else %}Never{% endif %}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="glass-panel" style="margin-top: 1.5rem;">
+    <h3 style="margin-bottom: 1.5rem;">Maintenance Insights</h3>
+    <div id="recommendations-container">
+        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">Loading recommendations...</p>
+    </div>
+</div>
+
+<script>
+async function loadFleetStatus() {
+    try {
+        const response = await fetch('/api/dashboard');
+        const data = await response.json();
+        const health = data.dashboard.fleet_health;
+        
+        document.getElementById('total-machines').innerText = health.total_machines;
+        document.getElementById('operating-count').innerText = health.operating;
+        document.getElementById('warning-count').innerText = health.warning;
+        document.getElementById('critical-count').innerText = health.critical;
+        document.getElementById('update-time').innerText = new Date().toLocaleTimeString();
+    } catch (err) {
+        console.error('Failed to load fleet status:', err);
+    }
+}
+
+async function loadRecommendations() {
+    try {
+        const response = await fetch('/api/maintenance/recommendations');
+        const data = await response.json();
+        const container = document.getElementById('recommendations-container');
+        
+        if (data.recommendations && data.recommendations.length > 0) {
+            container.innerHTML = data.recommendations.map(rec => {
+                const borderColor = rec.priority === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)';
+                const textColor = rec.priority === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)';
+                const bgColor = rec.priority === 'CRITICAL' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+                return `
+                <div style="background: rgba(255, 255, 255, 0.04); border-left: 4px solid ${borderColor}; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: ${textColor};">${rec.issue}</h4>
+                        <span style="background: ${bgColor}; color: ${textColor}; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">${rec.priority}</span>
+                    </div>
+                    <p style="color: var(--text-secondary); margin: 0.5rem 0; font-size: 0.9rem;"><strong>Action:</strong> ${rec.action}</p>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;"><strong>Est. Cost:</strong> ${rec.estimated_cost}</p>
+                </div>
+            `;
+            }).join('');
+        } else {
+            container.innerHTML = '<p style="color: var(--success); text-align: center; padding: 2rem;">✓ All machines operating normally. No immediate maintenance needed.</p>';
+        }
+    } catch (err) {
+        console.error('Failed to load recommendations:', err);
+    }
+}
+
+// Load on page load and every 15 seconds
+loadFleetStatus();
+loadRecommendations();
+setInterval(loadFleetStatus, 15000);
+setInterval(loadRecommendations, 30000);
+</script>
+{% endblock %}

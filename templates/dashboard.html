@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PredicTech{% endblock %}
+
+{% block content %}
+<div class="dashboard-top">
+    <div class="title">
+        <h1>Plant Monitoring Console</h1>
+        <p>Real-time telemetry and AI predictive analysis</p>
+    </div>
+    
+    <div class="system-status" id="system-status-badge">
+        <div class="pulse"></div>
+        <span id="status-text">Operations Normal</span>
+    </div>
+</div>
+
+<div class="metrics-row" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="glass-panel metric-card" style="grid-column: span 2; display: flex; flex-direction: row; justify-content: space-between;">
+        <div style="display: flex; flex-direction: column;">
+            <p style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; font-weight: 500; margin-bottom: 8px;">Hardware Simulation Control Panel</p>
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Trigger Manual Anomaly</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <button class="btn-control anomaly-none active" onclick="setAnomaly('none')">System Normal</button>
+                <button class="btn-control anomaly-heat" onclick="setAnomaly('heat')">Inject Heat Spike</button>
+                <button class="btn-control anomaly-vib" onclick="setAnomaly('vibration')">Inject Vibration</button>
+            </div>
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Real-Time Simulation</h3>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-control" id="start-sim" onclick="startSimulation()" style="background: var(--success);">Start Auto-Sim</button>
+                <button class="btn-control" id="stop-sim" onclick="stopSimulation()" style="background: var(--danger); display: none;">Stop Auto-Sim</button>
+                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem;">
+                    <input type="checkbox" id="auto-mode" checked onchange="toggleAutoMode()">
+                    Auto Anomalies
+                </label>
+            </div>
+        </div>
+        <div class="virtual-motor outline-mode">
+            <div class="motor-core" id="virtual-motor"></div>
+        </div>
+    </div>
+    <div class="glass-panel metric-card" style="grid-column: span 2; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+        <p style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; font-weight: 500; margin-bottom: 8px;">AI Neural Network Output</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+            <span style="font-size: 1.1rem; font-weight: 600;">Prediction Probability</span>
+            <span id="ai-risk-val" style="font-size: 1.5rem; font-weight: 700; color: var(--success);">0.0%</span>
+        </div>
+        <div class="progress-bg" style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 12px; overflow: hidden;">
+            <div id="ai-risk-bar" style="width: 0%; height: 100%; background: var(--success); transition: all 0.4s ease;"></div>
+        </div>
+        <span style="font-size: 0.9rem; color: var(--text-secondary);">Recommendation: <strong id="ai-recommendation" style="color: white;">Operating Efficiently</strong></span>
+        <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px; display: block;" id="ai-root-cause">Root Cause: Operations Normal</span>
+    </div>
+</div>
+
+<div class="metrics-row" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">System Uptime</span>
+        <span id="val-uptime" style="font-size: 2rem; font-weight: 800;">00:00:00</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Live runtime since app start</span>
+    </div>
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Total Records</span>
+        <span id="val-records" style="font-size: 2rem; font-weight: 800;">0</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Total telemetry events captured</span>
+    </div>
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Failure Rate</span>
+        <span id="val-failure-rate" style="font-size: 2rem; font-weight: 800; color: var(--warning);">0.0%</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Share of logs flagged as failure</span>
+    </div>
+    <div class="glass-panel metric-card" style="flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 1.25rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">AI Confidence</span>
+        <span id="val-avg-risk" style="font-size: 2rem; font-weight: 800; color: var(--accent-primary);">0.0%</span>
+        <span style="color: var(--text-secondary); font-size: 0.85rem;">Average model probability score</span>
+    </div>
+</div>
+
+<div class="metrics-row">
+    <div class="glass-panel metric-card">
+        <div class="metric-icon-bg temp-bg">🌡️</div>
+        <div class="metric-details">
+            <h3>Machine Temp</h3>
+            <div class="metric-value"><span id="val-temp">--</span><span class="unit">°C</span></div>
+        </div>
+    </div>
+    <div class="glass-panel metric-card">
+        <div class="metric-icon-bg vib-bg">〰️</div>
+        <div class="metric-details">
+            <h3>Vibration Sig</h3>
+            <div class="metric-value"><span id="val-vib">--</span><span class="unit">mm/s</span></div>
+        </div>
+    </div>
+    <div class="glass-panel metric-card">
+        <div class="metric-icon-bg curr-bg">⚡</div>
+        <div class="metric-details">
+            <h3>Power Load</h3>
+            <div class="metric-value"><span id="val-curr">--</span><span class="unit">A</span></div>
+        </div>
+    </div>
+    <div class="glass-panel metric-card">
+        <div class="metric-icon-bg" style="background: linear-gradient(135deg, #8B5CF6, #A855F7);">🔧</div>
+        <div class="metric-details">
+            <h3>Pressure</h3>
+            <div class="metric-value"><span id="val-pressure">--</span><span class="unit">psi</span></div>
+        </div>
+    </div>
+    <div class="glass-panel metric-card">
+        <div class="metric-icon-bg" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">⚙️</div>
+        <div class="metric-details">
+            <h3>RPM</h3>
+            <div class="metric-value"><span id="val-rpm">--</span><span class="unit">rpm</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="glass-panel chart-container">
+        <div class="chart-header">
+            <h3>Thermal Distribution</h3>
+        </div>
+        <div class="canvas-wrapper">
+            <canvas id="tempChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-panel chart-container">
+        <div class="chart-header">
+            <h3>Mechanical Vibration Frequency</h3>
+        </div>
+        <div class="canvas-wrapper">
+            <canvas id="vibChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="glass-panel" style="margin-top: 1.5rem;">
+    <div class="chart-header">
+        <h3>Live Event Feed</h3>
+        <span id="incident-count" style="color: var(--text-secondary);">0 incidents logged</span>
+    </div>
+    <div id="event-feed" class="event-feed">
+        <div class="event-card">
+            <h4>No incidents yet</h4>
+            <span>Live critical alerts and AI recommendations will appear here.</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

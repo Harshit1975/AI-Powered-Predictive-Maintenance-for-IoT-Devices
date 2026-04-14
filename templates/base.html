@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PredictiveTech AI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    {% if current_user.is_authenticated %}
+        <!-- Dashboard Layout -->
+        <nav class="sidebar">
+            <div class="brand">
+                <span class="brand-icon">⚙️</span>
+                <h2>PredicTech</h2>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                    📊 Live Dashboard
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-link {% if request.path == '/history' %}active{% endif %}">
+                    📋 Log History
+                </a>
+                <a href="{{ url_for('analytics') }}" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">
+                    🧠 Analytics
+                </a>
+                <a href="{{ url_for('fleet') }}" class="nav-link {% if request.path == '/fleet' %}active{% endif %}">
+                    🏭 Fleet Dashboard
+                </a>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="avatar">{{ current_user.username[0] | upper }}</div>
+                    <span style="font-size: 0.9rem; font-weight: 500;">{{ current_user.username }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Exit</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+    {% else %}
+        <!-- Auth Layout -->
+        <div class="auth-layout">
+            {% block auth_content %}{% endblock %}
+        </div>
+    {% endif %}
+
+    <!-- Top floating alert (hidden by default) -->
+    <div class="floating-alert" id="prediction-alert">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-body">
+            <h4>Critical Machine Failure Predicted</h4>
+            <p>The AI model detected anomalous sensor patterns indicating imminent mechanical breakdown. Immediate maintenance required.</p>
+            <div id="sms-status-container" style="margin-top: 10px; font-size: 0.85rem; color: #38bdf8; display: none; align-items: center; gap: 6px;">
+                <span class="pulse" style="width: 8px; height: 8px; background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
+                <span id="sms-status-text">Dispatching SMS Alert to Maintenance Team...</span>
+            </div>
+            <button class="btn-dismiss" onclick="dismissAlert()" style="margin-top: 12px;">Acknowledge</button>
+        </div>
+    </div>
+
+    {% block scripts %}
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% endblock %}
+</body>
+</html>
