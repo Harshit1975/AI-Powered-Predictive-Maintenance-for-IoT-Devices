@@ -11,6 +11,7 @@ from reportlab.lib import colors
 
 import joblib
 import numpy as np
+import pandas as pd
 import os
 import random
 import json
@@ -134,7 +135,7 @@ def generate_sensor_data():
     }
     
     if model:
-        features = np.array([[data['temperature'], data['vibration'], data['current']]])
+        features = pd.DataFrame([[data['temperature'], data['vibration'], data['current']]], columns=['temperature', 'vibration', 'current'])
         pred = model.predict(features)[0]
         probs = model.predict_proba(features)[0]
         
@@ -671,7 +672,7 @@ def export_csv():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # SocketIO Handlers
